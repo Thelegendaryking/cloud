@@ -22,7 +22,7 @@ Bu paket özel TF2 sunucusunda **yalnızca fake-client botları** kullanarak ant
 
 ## Derleme
 
-Repo içindeki GitHub Actions workflow'u SourceMod 1.12'nin güncel Linux paketini indirip iki `.sp` dosyasını derler ve `.smx` dosyalarını artifact olarak yayınlar.
+Repo içindeki GitHub Actions workflow'u SourceMod 1.12 build 7246 ile iki `.sp` dosyasını derler ve `.smx` dosyalarını artifact olarak yayınlar.
 
 Yerelde SourceMod scripting klasöründe de derleyebilirsin:
 
