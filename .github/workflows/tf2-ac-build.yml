@@ -1,0 +1,75 @@
+name: Build TF2 AC test plugins
+
+on:
+  push:
+    paths:
+      - 'tf2-ac-test/**'
+      - '.github/workflows/tf2-ac-build.yml'
+  pull_request:
+    paths:
+      - 'tf2-ac-test/**'
+      - '.github/workflows/tf2-ac-build.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download SourceMod 1.12 compiler
+        shell: bash
+        run: |
+          set -euo pipefail
+          curl -fsSL \
+            'https://www.sourcemod.net/smdrop/1.12/sourcemod-1.12.0-git7246-linux.tar.gz' \
+            -o /tmp/sourcemod.tar.gz
+          mkdir -p /tmp/sourcemod
+          tar -xzf /tmp/sourcemod.tar.gz -C /tmp/sourcemod
+
+      - name: Compile SourcePawn plugins
+        shell: bash
+        run: |
+          set -euo pipefail
+          SCRIPTING='/tmp/sourcemod/addons/sourcemod/scripting'
+          SPCOMP="$SCRIPTING/spcomp64"
+          if [ ! -x "$SPCOMP" ]; then
+            SPCOMP="$SCRIPTING/spcomp"
+          fi
+          chmod +x "$SPCOMP"
+          mkdir -p build
+
+          "$SPCOMP" -i"$SCRIPTING/include" \
+            tf2-ac-test/scripting/tf2_ac_bot_simulator.sp \
+            -obuild/tf2_ac_bot_simulator.smx
+
+          "$SPCOMP" -i"$SCRIPTING/include" \
+            tf2-ac-test/scripting/tf2_ac_shadow_detector.sp \
+            -obuild/tf2_ac_shadow_detector.smx
+
+          ls -lh build
+
+      - name: Package server layout
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p package/tf/addons/sourcemod/plugins
+          mkdir -p package/tf/cfg/sourcemod
+          cp build/*.smx package/tf/addons/sourcemod/plugins/
+          cp tf2-ac-test/cfg/sourcemod/*.cfg package/tf/cfg/sourcemod/
+          cp tf2-ac-test/README.md package/README.md
+          cd package
+          zip -r ../tf2-ac-test-server-package.zip .
+
+      - name: Upload compiled plugins
+        uses: actions/upload-artifact@v4
+        with:
+          name: tf2-ac-test-compiled
+          path: |
+            build/*.smx
+            tf2-ac-test-server-package.zip
+          if-no-files-found: error
