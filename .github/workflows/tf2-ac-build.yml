@@ -44,7 +44,7 @@ jobs:
           mkdir -p build
 
           "$SPCOMP" -i"$SCRIPTING/include" \
-            tf2-ac-test/scripting/tf2_ac_bot_simulator.sp \
+            tf2-ac-test/scripting/tf2_ac_bot_simulator_build.sp \
             -obuild/tf2_ac_bot_simulator.smx
 
           "$SPCOMP" -i"$SCRIPTING/include" \
